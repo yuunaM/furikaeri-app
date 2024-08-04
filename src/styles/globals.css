@@ -58,7 +58,6 @@ p.mizuhiki {
 }
 
 .top .flex > div {
-    width: 55%;
     padding: 7vw 5% 3%;
     box-sizing: border-box;
 }
@@ -72,7 +71,6 @@ p.mizuhiki {
 }
 
 .img_wrap {
-    width: 45% !important;
     position: relative;
     padding-top: 65%;
 }
@@ -80,7 +78,6 @@ p.mizuhiki {
 .top-img {
     position: absolute;
     bottom: 0;
-    width: 92% !important;
     right: 0;
     margin: auto;
 }
@@ -301,7 +298,6 @@ textarea {
 .radio_area .flex {
     display: flex;
     justify-content: center;
-    flex-wrap: wrap;
 }
 
 
@@ -321,6 +317,15 @@ textarea {
     }
     .radio_area label:not(:last-child) {
         margin-right: 18px;
+    }
+    .top .flex > div {
+        width: 55%;
+    }
+    .img_wrap {
+        width: 45% !important;
+    }
+    .top-img {
+        width: 92% !important;
     }
 }
 
@@ -355,5 +360,45 @@ textarea {
     .addArea {
         width: 90%;
         padding: 6% 3% 0;
+    }
+    .radio_area .flex {
+        flex-wrap: wrap;
+    }
+    .fc .fc-toolbar {
+        font-size: 4vw;
+    }
+    .set_left {
+        width: 85%;
+    }
+    .set_right {
+        width: 70%;
+    }
+    .data_area {
+        padding: 6% 4% 20%;
+    }
+    .top .flex {
+        margin: 3% 5%;
+        width: 90%;
+        flex-direction: column-reverse;
+        overflow: hidden;
+    }
+    h1 {
+        font-size: 12vw;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .top-img {
+        bottom: -60vw;
+        width: 80% !important;
+        right: 0;
+        left: -31%;
+    }
+    .sub_catch {
+        text-align: center;
+        font-size: 3vw;
+    }
+    p.mizuhiki {
+        margin: 10% 0 9%;
+        transform: scale(1.6);
     }
 }

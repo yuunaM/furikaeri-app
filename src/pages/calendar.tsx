@@ -97,7 +97,7 @@ export default function Calendar() {
     const renderEventContent = () => {
         return (
             <div>
-                <img src="/stamp.png" alt="スタンプ" style={{ width: '100%', height: '100%' }} />
+                <Image src="/stamp.png" alt="スタンプ" style={{ width: '100%', height: '100%' }} />
             </div>
         );
     };

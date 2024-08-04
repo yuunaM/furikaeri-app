@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { db } from '../config/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import Link from 'next/link';
 
 export default function AddData() {
     const [loading, setLoading] = useState<boolean>(false);
@@ -43,10 +44,6 @@ export default function AddData() {
         }
     }
 
-    const handleCal = () => {
-        router.push('/Calendar');
-    }
-
     return (
         <div className='add_wrap jpn_bg'>
             <div className='addArea'>
@@ -72,7 +69,7 @@ export default function AddData() {
                     </div>
                     <div className='flex'>
                         <button type='submit' disabled={!isFormValid} className='linkBtn'>データを遣わす</button>
-                        <button type='button' onClick={handleCal} className='linkBtn'>データを送らずに暦を見る</button>
+                        <Link href="/Calendar" className='linkBtn'>データを送らずに暦を見る</Link>
                     </div>
                 </form>
             </div>

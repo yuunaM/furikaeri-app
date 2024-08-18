@@ -1,24 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
 import FullCalendar from '@fullcalendar/react';
+import { EventContext } from '../context/EventContext';
+import { dataArray } from '../context/EventContext';
 import jaLocale from '@fullcalendar/core/locales/ja';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import { useRouter } from 'next/router';
-import { db } from '../config/firebase';
-import { collection, getDocs } from 'firebase/firestore';
 import { Chart as ChartJS, CategoryScale, PointElement, LineElement, LinearScale, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import styles from "@/styles/Home.module.css";
 import moment from 'moment';
 import Image from 'next/image';
+import Modal from 'react-modal';
 
 ChartJS.register(CategoryScale, PointElement, LineElement, LinearScale, BarElement, Title, Tooltip, Legend, Filler);
-
-interface dataArray {
-    comment: string;
-    feeling: number;
-    stamp: boolean;
-    date: Date;
-}
 
 interface stampEvent {
     title: string;
@@ -29,75 +23,58 @@ export default function Calendar() {
     const [graphData, setGraphData] = useState<dataArray[]>([]);
     const [label, setLabel] = useState<string[]>([]);
     const [events, setEvents] = useState<stampEvent[]>([]);
-    const [disable, setDisable] = useState<boolean>(false);
-    const [btnText, setBtnText] = useState<string>('振り返る');
+    const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [countStamp, setCountStamp] = useState<number>();
     const router = useRouter();
 
-    // const context = useContext(EventContext); // コンテキストの値を'context'に代入
-    // if (!context) { // contextがtrueかの確認 これがないとTypescriptはエラーになる
-    //     throw new Error('Calendar must be used within an EventProvider');
-    // }
-    // const { events, setEvents } = context; // 分割代入でコンテキストから'events','setEvents'を取得
+    const context = useContext(EventContext);
+    if (!context) { // contextがtrueかの確認 これがないとTypescriptではエラーになる
+        throw new Error('Calendar must be used within an EventProvider');
+    }
+    const { fetchArray, disable, btnText } = context; // 分割代入でコンテキストから各ステートを取得
 
     // dbからデータ取得
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const querySnapshot = await getDocs(collection(db, 'data'));
-                const groupData = querySnapshot.docs.map((doc) => {
-                    return {
-                        comment: doc.data().comment,
-                        feeling: doc.data().feeling,
-                        stamp: doc.data().stamp,
-                        date: doc.data().createdAt.toDate()
-                    }
-                });
+        const fetchContext = async () => {
+            setGraphData(fetchArray); // グラフデータ用にステートへ登録
+            setLabel(fetchArray.map(item => moment(item.date).format('YYYY-MM-DD'))); // X軸用のラベルをフォーマット
 
-                const sortedData = dateSortData(groupData);
-                setGraphData(sortedData); // グラフデータ用にステートへ登録
-                setLabel(sortedData.map(item => moment(item.date).format('YYYY-MM-DD'))); // X軸用のラベルをフォーマット
+            // カレンダー表示用のスタンプをmap
+            const stampEvents = fetchArray.filter(item => item.stamp).map(item => ({
+                title: 'スタンプ',
+                start: item.date
+            }));
+            setEvents(stampEvents);
 
-                // カレンダー表示用のスタンプをmap
-                const stampEvents = sortedData.filter(item => item.stamp).map(item => ({
-                    title: 'スタンプ',
-                    start: item.date
-                }));
-                setEvents(stampEvents);
-
-                // 振り返りが済んでいるかの確認
+            // 一定期間連続で振り返った場合はモーダルでお祝い表示
+            const countStampCheck = [7, 14, 21, 30];
+            countStampCheck.forEach((weeks) => {
                 const today = new Date();
-                const todayData = moment(today).format('YYYY-MM-DD');
+                const pastWeek = new Date(today);
+                pastWeek.setDate(today.getDate() - weeks);
 
-                const lastDay = groupData[groupData.length - 1].date
-                const lastData = moment(lastDay).format('YYYY-MM-DD');
+                const stampLength = fetchArray.filter(item => {
+                    const itemDate = moment(item.date);
+                    const itemStamp = item.stamp
+                    return itemDate.isAfter(pastWeek) && itemDate.isBefore(today) && itemStamp === true;
+                }).length;
 
-                if (todayData === lastData) { // 振り返り済みならボタンのdisabledをtrue
-                    setDisable(true);
-                    setBtnText('本日振り返り済み');
+                if (stampLength === weeks) {
+                    setModalOpen(true);
+                    setCountStamp(weeks);
                 }
+            });
 
-            } catch (error) {
-                console.error('Error fetching profit data: ', error);
-            }
         }
-        fetchData();
-    }, []);
+        fetchContext();
+    }, [fetchArray]);
 
-    // 日付順にソート
-    const dateSortData = (data: dataArray[]) => {
-        const sortData = data.sort((a, b) => {
-            const dateA = moment(a.date);
-            const dateB = moment(b.date);
-            return dateA.diff(dateB);
-        });
-        return sortData;
-    }
 
     // カレンダーにスタンプ画像表示
     const renderEventContent = () => {
         return (
             <div>
-                <Image src="/stamp.png" alt="スタンプ" width={100} height={100} style={{ width: '100%', height: '100%' }} />
+                <Image src="/stamp.svg" alt="スタンプ" width={300} height={300} layout='responsive' />
             </div>
         );
     };
@@ -110,9 +87,17 @@ export default function Calendar() {
         router.push('/');
     }
 
+    const handleClose = () => {
+        setModalOpen(false);
+    }
+
 
     return (
         <div className='data_area jpn_bg'>
+            <Modal isOpen={modalOpen} onRequestClose={handleClose}>
+                <p className='modalMessage'>今宵は振り返り連続{countStamp}日目じゃ<br />このまま続けるのじゃ</p>
+                <button onClick={handleClose}>心得た</button>
+            </Modal>
             <div className='cal_area'>
                 <FullCalendar
                     plugins={[dayGridPlugin]}
@@ -185,8 +170,8 @@ export default function Calendar() {
                 <button onClick={handleAdd} className='linkBtn' disabled={disable}>{btnText}</button>
                 <button onClick={handleTop} className='linkBtn'>ほーむ</button>
             </div>
-            <p className='cloud set_left'><Image src='/cloud_left.png' alt='雲' layout='responsive' width={537} height={496} /></p>
-            <p className='cloud set_right'><Image src='/cloud_right.png' alt='雲' layout='responsive' width={634} height={537} /></p>
+            <p className='cloud set_left'><Image src='/cloud_left.png' alt='雲' width={537} height={496} /></p>
+            <p className='cloud set_right'><Image src='/cloud_right.png' alt='雲' width={634} height={537} /></p>
         </div>
     );
 }

@@ -3,26 +3,25 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { db } from '../config/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import Link from 'next/link';
+import { EventContext } from '../context/EventContext';
 
 export default function AddData() {
     const [loading, setLoading] = useState<boolean>(false);
-    const [isFormValid, setIsFormValid] = useState<boolean>(false);
     const [radio, setRadio] = useState<number | null>(null);
     const [comment, setComment] = useState<string>('');
     const router = useRouter();
 
-    // const context = useContext(EventContext); // コンテキストの値を'context'に代入
-    // if (!context) { // contextがtrueかの確認 これがないとTypescriptはエラーになる
-    //     throw new Error('Calendar must be used within an EventProvider');
-    // }
-    // const { setEvents } = context; // 分割代入でコンテキストから'setEvents'を取得
+    const context = useContext(EventContext);
+    if (!context) {
+        throw new Error('Calendar must be used within an EventProvider');
+    }
+    const { disable, setDisable, setSubmit, btnText } = context;
 
     useEffect(() => {
         if (comment && radio !== null) {
-            setIsFormValid(true);
+            setDisable(false);
         } else {
-            setIsFormValid(false);
+            setDisable(true);
         }
     }, [comment, radio]);
 
@@ -30,13 +29,14 @@ export default function AddData() {
         e.preventDefault();
         setLoading(true);
         try {
-            await addDoc(collection(db, 'data'), {
+            await addDoc(collection(db, 'data', 'data_doc', 'sub'), {
                 comment: comment,
                 feeling: radio,
                 stamp: true,
                 createdAt: serverTimestamp()
             });
         } finally {
+            setSubmit(true);
             setLoading(false);
             setComment('');
             setRadio(0);
@@ -67,10 +67,7 @@ export default function AddData() {
                         <h3>今日の振り返り</h3>
                         <textarea style={{ width: '450px', height: '200px' }} onChange={(e) => setComment(e.target.value)} placeholder='まこと由々しき事態'></textarea>
                     </div>
-                    <div className='flex'>
-                        <button type='submit' disabled={!isFormValid} className='linkBtn'>データを遣わす</button>
-                        <Link href="/Calendar" className='linkBtn'>データを送らずに暦を見る</Link>
-                    </div>
+                    <button type='submit' className='linkBtn' disabled={disable}>{btnText}</button>
                 </form>
             </div>
             <p className='cloud set_left'><Image src='/cloud_left.png' alt='雲' layout='responsive' width={537} height={496} /></p>

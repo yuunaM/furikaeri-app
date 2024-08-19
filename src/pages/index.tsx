@@ -11,6 +11,8 @@ import Modal from 'react-modal';
 export default function Home() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [loginEmail, setLoginEmail] = useState<string>('');
+    const [loginPassword, setLoginPassword] = useState<string>('');
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const auth = getAuth();
     const context = useContext(EventContext);
@@ -36,11 +38,21 @@ export default function Home() {
         return () => unsubscribe();
     }, [auth]);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log("User created:", userCredential.user);
+        } catch (error) {
+            console.error("Error logging in: ", error);
+        }
+    }
+
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            await signInWithEmailAndPassword(auth, loginEmail, loginPassword); // 入力された情報をFirebase authに照会し、一致するユーザー情報があるか確認
+            setModalOpen(false);
         } catch (error) {
             console.error("Error logging in: ", error);
         }
@@ -53,28 +65,55 @@ export default function Home() {
 
     return (
         <div className='top jpn_bg'>
-            <Modal isOpen={modalOpen} onRequestClose={handleClose} >
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label>email</label>
-                        <input
-                            type='email'
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder='email'
-                        />
-                    </div>
-                    <div>
-                        <label>password</label>
-                        <input
-                            type='password'
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder='password'
-                        />
-                    </div>
-                    <button type='submit' >Sign UP</button>
-                </form>
+            <Modal isOpen={modalOpen} onRequestClose={handleClose}>
+                <div>
+                    <h3>Sign in</h3>
+                    <form onSubmit={handleSignIn}>
+                        <div>
+                            <label>email</label>
+                            <input
+                                type='email'
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder='email'
+                            />
+                        </div>
+                        <div>
+                            <label>password</label>
+                            <input
+                                type='password'
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder='password'
+                            />
+                        </div>
+                        <button type='submit' >Sign UP</button>
+                    </form>
+                </div>
+                <div>
+                    <h3>Login</h3>
+                    <form onSubmit={handleLogin}>
+                        <div>
+                            <label>email</label>
+                            <input
+                                type='email'
+                                value={loginEmail}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder='email'
+                            />
+                        </div>
+                        <div>
+                            <label>password</label>
+                            <input
+                                type='password'
+                                value={loginPassword}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder='password'
+                            />
+                        </div>
+                        <button type='submit' >Sign UP</button>
+                    </form>
+                </div>
             </Modal>
             <p className='mizuhiki'><Image src='/mizuhiki.svg' alt='水引' layout='responsive' width={1800} height={200} /></p>
             <div className='flex'>

@@ -131,6 +131,15 @@ export default function Calendar() {
                             plugins: {
                                 legend: {
                                     display: false,
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            const dataIndex = context.dataIndex;
+                                            const comment = graphData[dataIndex]?.comment || '';
+                                            return `${context.dataset.label}: ${context.raw} ${comment ? `- ${comment}` : ''}`;
+                                        }
+                                    }
                                 }
                             },
                             scales: {

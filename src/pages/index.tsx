@@ -98,7 +98,7 @@ export default function Home() {
                             <input
                                 type='email'
                                 value={loginEmail}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => setLoginEmail(e.target.value)}
                                 placeholder='email'
                             />
                         </div>
@@ -107,7 +107,7 @@ export default function Home() {
                             <input
                                 type='password'
                                 value={loginPassword}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => setLoginPassword(e.target.value)}
                                 placeholder='password'
                             />
                         </div>

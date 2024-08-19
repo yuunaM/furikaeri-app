@@ -26,6 +26,10 @@ export default function Home() {
         router.push('/AddData');
     }
 
+    const handleCal = () => {
+        router.push('/Calendar');
+    }
+
     // 認証
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -125,7 +129,7 @@ export default function Home() {
                     </div>
                     <div className='btn_wrap'>
                         <button onClick={handleAdd} className='linkBtn' disabled={disable}>{btnText}</button>
-                        <Link href='/Calendar' className='linkBtn'>暦を見る</Link>
+                        <button onClick={handleCal} className='linkBtn'>暦を見る</button>
                     </div>
                 </div>
             </div>

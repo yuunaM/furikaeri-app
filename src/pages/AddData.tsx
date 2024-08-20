@@ -40,7 +40,7 @@ export default function AddData() {
             setLoading(false);
             setComment('');
             setRadio(0);
-            router.push('/Calendar');
+            router.push('/Calendars');
         }
     }
 

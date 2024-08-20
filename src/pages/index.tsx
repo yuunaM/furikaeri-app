@@ -1,20 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { auth } from '../config/firebase';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, User } from 'firebase/auth';
-import Link from 'next/link';
+import React, { useContext } from 'react';
 import Image from 'next/image';
 import { EventContext } from '../context/EventContext';
 import { useRouter } from 'next/router';
 import styles from "@/styles/Home.module.css";
-import Modal from 'react-modal';
 
 export default function Home() {
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [loginEmail, setLoginEmail] = useState<string>('');
-    const [loginPassword, setLoginPassword] = useState<string>('');
-    const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const auth = getAuth();
     const context = useContext(EventContext);
     if (!context) {
         throw new Error('Calendar must be used within an EventProvider');
@@ -30,95 +20,9 @@ export default function Home() {
         router.push('/Calendars');
     }
 
-    // 認証
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                setModalOpen(true);
-            } else {
-                setModalOpen(false);
-            }
-        });
-        return () => unsubscribe();
-    }, [auth]);
-
-    const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            console.log("User created:", userCredential.user);
-        } catch (error) {
-            console.error("Error logging in: ", error);
-        }
-    }
-
-    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        try {
-            await signInWithEmailAndPassword(auth, loginEmail, loginPassword); // 入力された情報をFirebase authに照会し、一致するユーザー情報があるか確認
-            setModalOpen(false);
-        } catch (error) {
-            console.error("Error logging in: ", error);
-        }
-    }
-
-    const handleClose = () => {
-        setModalOpen(false);
-    }
-
 
     return (
         <div className='top jpn_bg'>
-            <Modal isOpen={modalOpen} onRequestClose={handleClose}>
-                <div>
-                    <h3>Sign in</h3>
-                    <form onSubmit={handleSignIn}>
-                        <div>
-                            <label>email</label>
-                            <input
-                                type='email'
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder='email'
-                            />
-                        </div>
-                        <div>
-                            <label>password</label>
-                            <input
-                                type='password'
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder='password'
-                            />
-                        </div>
-                        <button type='submit' >Sign UP</button>
-                    </form>
-                </div>
-                <div>
-                    <h3>Login</h3>
-                    <form onSubmit={handleLogin}>
-                        <div>
-                            <label>email</label>
-                            <input
-                                type='email'
-                                value={loginEmail}
-                                onChange={(e) => setLoginEmail(e.target.value)}
-                                placeholder='email'
-                            />
-                        </div>
-                        <div>
-                            <label>password</label>
-                            <input
-                                type='password'
-                                value={loginPassword}
-                                onChange={(e) => setLoginPassword(e.target.value)}
-                                placeholder='password'
-                            />
-                        </div>
-                        <button type='submit' >Sign UP</button>
-                    </form>
-                </div>
-            </Modal>
             <p className='mizuhiki'><Image src='/mizuhiki.svg' alt='水引' layout='responsive' width={1800} height={200} /></p>
             <div className='flex'>
                 <p className='img_wrap'><Image src='/top-img.png' className='top-img' alt='見返り美人' layout='responsive' width={200} height={500} /></p>

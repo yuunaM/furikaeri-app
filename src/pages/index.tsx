@@ -27,7 +27,7 @@ export default function Home() {
     }
 
     const handleCal = () => {
-        router.push('/Calendar');
+        router.push('/Calendars');
     }
 
     // 認証
